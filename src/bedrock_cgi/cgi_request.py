@@ -1,14 +1,9 @@
 import codecs
-import io
 import os
 import sys
 import json
-from .constant import false, MIME_TYPE_JSON, CHARSET, CHARSET_UTF8
-from .cgi_response import respond, STATUS_BAD_REQUEST
-
-# cgi request header environment variables and values
-CONTENT_LENGTH = "CONTENT_LENGTH"
-CONTENT_TYPE = "CONTENT_TYPE"
+from .constant import false, MIME_TYPE_JSON, CHARSET, CHARSET_UTF8, STATUS_BAD_REQUEST, CONTENT_TYPE, CONTENT_LENGTH
+from .cgi_response import respond
 
 class CgiRequest:
 
@@ -20,7 +15,7 @@ class CgiRequest:
         return false
 
     @staticmethod
-    def __charset ():
+    def __charset (defaultEncoding = CHARSET_UTF8):
         contentType = os.environ.get(CONTENT_TYPE, None)
         if (contentType != None):
             splitResult = contentType.split(";", 1)
@@ -31,9 +26,10 @@ class CgiRequest:
                 if (CHARSET in parameters):
                     # technically the attribute value could be a quoted string that we should parse...
                     return str(parameters[CHARSET]).strip (" '\"\t\r\n")
-        # assume UTF-8 if no charset is passed, not technically correct according to standards, but for
-        # most characters we encounter here will be the same as ASCII or ISO-8859-1 (Western Latin 1)
-        return CHARSET_UTF8
+        # return the default if no charset is passed. though not technically correct according to
+        # standards, most characters we encounter here will be the same in UTF-8 as ASCII or
+        # ISO-8859-1 (Western Latin 1)
+        return defaultEncoding
 
     @staticmethod
     def getQuery ():
@@ -42,8 +38,8 @@ class CgiRequest:
             # the length must be specified
             contentLength = int (os.environ.get(CONTENT_LENGTH, 0))
             if (contentLength > 0):
-                inputStream = io.TextIOWrapper(sys.stdin.buffer, encoding=CgiRequest.__charset ())
-                #inputStream = codecs.getreader(CgiRequest.__charset ())(sys.stdin.buffer)
+                #inputStream = io.TextIOWrapper(sys.stdin.buffer, encoding=CgiRequest.__charset ())
+                inputStream = codecs.getreader(CgiRequest.__charset ())(sys.stdin.buffer)
                 inputJson = inputStream.read(contentLength)
                 return json.loads(inputJson)
         # this is just a base error - if we couldn't get a workable request

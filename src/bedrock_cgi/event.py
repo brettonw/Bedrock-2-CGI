@@ -1,9 +1,9 @@
 import json
 import time
 import inspect
-from .constant import true, false, CHARSET_UTF8
+from .constant import true, false, CHARSET_UTF8, STATUS_OK
 from .cgi_request import CgiRequest
-from .cgi_response import respond, STATUS_OK
+from .cgi_response import respond
 
 # some constants we need
 QUERY = "query"

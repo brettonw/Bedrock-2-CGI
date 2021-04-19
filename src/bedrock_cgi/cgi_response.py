@@ -1,27 +1,20 @@
 import sys
-from .constant import MIME_TYPE_JSON, CHARSET, CHARSET_UTF8
+from .constant import MIME_TYPE_JSON, CHARSET, CHARSET_UTF8, HEADER_STATUS, HEADER_CONTENT_TYPE, REQUEST_METHOD_POST, REQUEST_METHOD_OPTIONS
 
-# cgi response headers
-HEADER_STATUS = "STATUS"
-HEADER_CONTENT_TYPE = "CONTENT-TYPE"
+def respond (headerStatus, response, encoding = CHARSET_UTF8):
+    def __writeEncoded (string = ""):
+        sys.stdout.buffer.write ("{}\n".format (string).encode (encoding))
 
-# cgi response header values
-STATUS_OK = "200 OK"
-STATUS_BAD_REQUEST = "400 Bad Request"
-STATUS_INTERNAL_SERVER_ERROR = "500 Internal Server Error"
-STATUS_UNSUPPORTED_REQUEST_METHOD = "501 Unsupported Request"
+        # print the headers...
+    __writeEncoded ("{}: {}".format (HEADER_STATUS, headerStatus))
+    __writeEncoded ("{}: {}; {}={}".format (HEADER_CONTENT_TYPE, MIME_TYPE_JSON, CHARSET, CHARSET_UTF8))
+    __writeEncoded ("X-Content-Type-Options: nosniff")
+    __writeEncoded ("Access-Control-Allow-Origin: *")
+    __writeEncoded ("Access-Control-Allow-Headers: *")
+    __writeEncoded ("Access-Control-Allow-Methods: {},{}".format (REQUEST_METHOD_POST, REQUEST_METHOD_OPTIONS))
+    __writeEncoded ()
 
-def respond (headerStatus, response):
-    # print the headers...
-    print ("{}: {}".format (HEADER_STATUS, headerStatus))
-    print ("{}: {}; {}={}".format (HEADER_CONTENT_TYPE, MIME_TYPE_JSON, CHARSET, CHARSET_UTF8))
-    print ("X-Content-Type-Options: nosniff")
-    print ("Access-Control-Allow-Origin: *")
-    print ("Access-Control-Allow-Headers: *")
-    print ("Access-Control-Allow-Methods: POST,OPTIONS")
-    print ()
-
-    # print the response
-    print (response.encode(CHARSET_UTF8))
+    # print the response, note that it is already encoded, so from here needs to be treated as raw bytes
+    __writeEncoded(response)
 
     # NOTE, no further responses should be issued after this

@@ -1,12 +1,8 @@
 import os
 import inspect
-from .cgi_response import respond, STATUS_OK, STATUS_UNSUPPORTED_REQUEST_METHOD
+from .constant import STATUS_OK, STATUS_UNSUPPORTED_REQUEST_METHOD, REQUEST_METHOD, REQUEST_METHOD_POST, REQUEST_METHOD_OPTIONS
+from .cgi_response import respond
 from .event import Event
-
-# cgi request header environment variables and values
-REQUEST_METHOD = "REQUEST_METHOD"
-REQUEST_METHOD_POST = "POST"
-REQUEST_METHOD_OPTIONS = "OPTIONS"
 
 class ServiceBase:
     @staticmethod

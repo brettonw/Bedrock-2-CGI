@@ -14,20 +14,28 @@ from bedrock_cgi.constant import true, false, MIME_TYPE_JSON, CHARSET, CHARSET_U
 def handleOk (event):
     event.ok ({ "OK": "OK" })
 
-class TestStdIo:
-    def __init__(self, string):
-        self.buffer = BytesIO (string)
+class TestStdIO:
+    def __init__(self, string = None):
+        if (string == None):
+            self.buffer = BytesIO ()
+        else:
+            self.buffer = BytesIO (string)
+
+    def getValue (self, encoding = CHARSET_UTF8):
+        return self.buffer.getvalue()
 
 class Test (TestCase):
     def testBedrockCgi (self):
-        requestString = json.dumps({ "event": "ok" }, ensure_ascii=false).encode(CHARSET_UTF8)
         os.environ[REQUEST_METHOD] = REQUEST_METHOD_POST
         os.environ[CONTENT_TYPE] = "{}; {}={}".format (MIME_TYPE_JSON, CHARSET, CHARSET_UTF8)
+        requestString = json.dumps({ "event": "ok" }, ensure_ascii=false).encode(CHARSET_UTF8)
         os.environ[CONTENT_LENGTH] = "{}".format (len (requestString))
-        with patch ("sys.stdin", new = TestStdIo (requestString)), patch("sys.stdout", new=StringIO()) as stdOut:
+        with patch ("sys.stdin", new = TestStdIO(requestString)), patch("sys.stdout", new=TestStdIO()) as stdOut:
             ServiceBase.respond ()
+
+            response = stdOut.getValue(CHARSET_UTF8)
             # need to read off the header lines first...
-            response = json.loads (stdOut.getvalue().decode(CHARSET_UTF8))
+            #response = json.loads (response)
             #self.assertEqual()
             #self.assertEqual(stdOut.getvalue().strip(), expected_out)
 
