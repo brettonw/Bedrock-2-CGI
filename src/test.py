@@ -14,13 +14,17 @@ from bedrock_cgi.constant import true, false, MIME_TYPE_JSON, CHARSET, CHARSET_U
 def handleOk (event):
     event.ok ({ "OK": "OK" })
 
+class TestStdIo:
+    def __init__(self, string):
+        self.buffer = BytesIO (string)
+
 class Test (TestCase):
     def testBedrockCgi (self):
         requestString = json.dumps({ "event": "ok" }, ensure_ascii=false).encode(CHARSET_UTF8)
         os.environ[REQUEST_METHOD] = REQUEST_METHOD_POST
         os.environ[CONTENT_TYPE] = "{}; {}={}".format (MIME_TYPE_JSON, CHARSET, CHARSET_UTF8)
         os.environ[CONTENT_LENGTH] = "{}".format (len (requestString))
-        with patch ("sys.stdin", new = BytesIO (requestString)), patch("sys.stdout", new=StringIO()) as stdOut:
+        with patch ("sys.stdin", new = TestStdIo (requestString)), patch("sys.stdout", new=StringIO()) as stdOut:
             ServiceBase.respond ()
             # need to read off the header lines first...
             response = json.loads (stdOut.getvalue().decode(CHARSET_UTF8))

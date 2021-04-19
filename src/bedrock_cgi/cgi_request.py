@@ -42,8 +42,8 @@ class CgiRequest:
             # the length must be specified
             contentLength = int (os.environ.get(CONTENT_LENGTH, 0))
             if (contentLength > 0):
-                #inputStream = io.TextIOWrapper(sys.stdin.buffer, encoding=CgiRequest.__charset ())
-                inputStream = codecs.getreader(CgiRequest.__charset ())(sys.stdin)
+                inputStream = io.TextIOWrapper(sys.stdin.buffer, encoding=CgiRequest.__charset ())
+                #inputStream = codecs.getreader(CgiRequest.__charset ())(sys.stdin.buffer)
                 inputJson = inputStream.read(contentLength)
                 return json.loads(inputJson)
         # this is just a base error - if we couldn't get a workable request
