@@ -1,3 +1,4 @@
+import codecs
 import io
 import os
 import sys
@@ -41,8 +42,10 @@ class CgiRequest:
             # the length must be specified
             contentLength = int (os.environ.get(CONTENT_LENGTH, 0))
             if (contentLength > 0):
-                inputStream = io.TextIOWrapper(sys.stdin.buffer, encoding=CgiRequest.__charset ())
+                #inputStream = io.TextIOWrapper(sys.stdin.buffer, encoding=CgiRequest.__charset ())
+                inputStream = codecs.getreader(CgiRequest.__charset ())(sys.stdin)
                 inputJson = inputStream.read(contentLength)
                 return json.loads(inputJson)
         # this is just a base error - if we couldn't get a workable request
         respond (STATUS_BAD_REQUEST, "Bad Request ({} must be {}, and {} > 0)".format (CONTENT_TYPE, MIME_TYPE_JSON, CONTENT_LENGTH))
+        return None

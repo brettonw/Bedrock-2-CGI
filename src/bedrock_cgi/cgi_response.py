@@ -24,6 +24,4 @@ def respond (headerStatus, response):
     # print the response
     print (response.encode(CHARSET_UTF8))
 
-    # exit stage left
-    sys.exit(0)
-
+    # NOTE, no further responses should be issued after this

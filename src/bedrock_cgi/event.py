@@ -37,22 +37,23 @@ class Event:
 
     def handle (self, globals = None):
         try:
-            if (EVENT in self.query):
-                eventName = str(self.query[EVENT])
-                eventHandler = "handle{}".format (eventName.lower().capitalize())
-                if (globals == None):
-                    # get the globals from the top-level calling frame
-                    frame = inspect.currentframe()
-                    while (frame.f_back != None):
-                        frame = frame.f_back
-                    globals = frame.f_globals
-                if (eventHandler in globals):
-                    # the handler is expected to call cgi.ok or cgi.error on the instance
-                    globals[eventHandler](self)
+            if (self.query != None):
+                if (EVENT in self.query):
+                    eventName = str(self.query[EVENT])
+                    eventHandler = "handle{}".format (eventName.lower().capitalize())
+                    if (globals == None):
+                        # get the globals from the top-level calling frame
+                        frame = inspect.currentframe()
+                        while (frame.f_back != None):
+                            frame = frame.f_back
+                        globals = frame.f_globals
+                    if (eventHandler in globals):
+                        # the handler is expected to call cgi.ok or cgi.error on the instance
+                        globals[eventHandler](self)
+                    else:
+                        self.error("No handler found for '{}' ({})".format (EVENT, eventName))
                 else:
-                    self.error("No handler found for '{}' ({})".format (EVENT, eventName))
-            else:
-                self.error ("Missing '{}'".format (EVENT))
+                    self.error ("Missing '{}'".format (EVENT))
         except Exception as exception:
             self.errorOnException(exception)
 
