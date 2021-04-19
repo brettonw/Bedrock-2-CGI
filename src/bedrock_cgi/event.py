@@ -1,6 +1,7 @@
 import json
 import time
 import inspect
+from .constant import true, false, CHARSET_UTF8
 from .cgi_request import CgiRequest
 from .cgi_response import respond, STATUS_OK
 
@@ -26,7 +27,7 @@ class Event:
         bedrockResponse = { STATUS: status, QUERY: self.query, RESPONSE_TIME_NS : time.time_ns() - self.startTime }
         if (response != None):
             bedrockResponse[responseName] = response
-        respond (STATUS_OK, json.dumps (bedrockResponse))
+        respond (STATUS_OK, json.dumps (bedrockResponse, ensure_ascii=false))
 
     def ok (self, response):
         self.__respond (OK, RESPONSE, response)

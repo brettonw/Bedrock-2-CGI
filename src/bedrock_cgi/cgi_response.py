@@ -22,7 +22,7 @@ def respond (headerStatus, response):
     print ()
 
     # print the response
-    print (response)
+    print (response.encode(CHARSET_UTF8))
 
     # exit stage left
     sys.exit(0)
