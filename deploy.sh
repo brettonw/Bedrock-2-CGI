@@ -20,4 +20,4 @@ git commit -m "build number increment" $BUILD_NUMBER_FILE;
 python3 -m build
 python3 -m twine upload dist/*
 rm -rf build dist setup.cfg
-find . -iname *.egg-info -exec rm -rf {} \;
+find . -type d -iname *.egg-info -print0 | xargs -0 -I {} rm -rf "{}"
