@@ -1,67 +1,68 @@
 import json
 import time
 import inspect
-from .constant import true, false, CHARSET_UTF8, STATUS_OK
+import types
+import typing
+
+from .constant import *
 from .cgi_request import CgiRequest
 from .cgi_response import respond
 
-# some constants we need
-QUERY = "query"
-RESPONSE = "response"
-RESPONSE_TIME_NS = "response-time-ns"
-STATUS = "status"
-OK = "ok"
-ERROR = "error"
-EVENT = "event"
+__all__ = ["Event"]
 
 """
 Common Gateway Interface - this joins the Server Base and event handling of the Java version of
 Bedrock.
 """
+
+
 class Event:
     def __init__(self):
-        self.query = CgiRequest.getQuery()
+        self.query = CgiRequest.get_query()
         self.startTime = time.time_ns()
 
-    def __respond (self, status, responseName, response):
-        bedrockResponse = { STATUS: status, QUERY: self.query, RESPONSE_TIME_NS : time.time_ns() - self.startTime }
-        if (response != None):
-            bedrockResponse[responseName] = response
-        respond (STATUS_OK, json.dumps (bedrockResponse, ensure_ascii=false))
+    def _respond(self, status: str, response_name: str, response: typing.Union[list, dict, str]):
+        bedrock_response = {EVENT_STATUS: status, EVENT_QUERY: self.query, EVENT_RESPONSE_TIME_NS: time.time_ns() - self.startTime}
+        if response is not None:
+            bedrock_response[response_name] = response
+        respond(STATUS_OK, json.dumps(bedrock_response, ensure_ascii=False))
 
-    def ok (self, response):
-        self.__respond (OK, RESPONSE, response)
+    def ok(self, response: typing.Union[list, dict, str]):
+        self._respond(EVENT_STATUS_OK, EVENT_RESPONSE, response)
 
-    def error (self, description):
-        self.__respond (ERROR, ERROR, description)
+    def error(self, description: typing.Union[list, dict, str]):
+        self._respond(EVENT_STATUS_ERROR, EVENT_STATUS_ERROR, description)
 
-    def handle (self, globals = None):
+    def handle(self, call_frame: types.FrameType = None):
         try:
-            if (self.query != None):
-                if (EVENT in self.query):
-                    eventName = str(self.query[EVENT])
-                    eventHandler = "handle{}".format (eventName.lower().capitalize())
-                    if (globals == None):
+            if self.query is not None:
+                if EVENT in self.query:
+                    event_name = str(self.query[EVENT])
+                    event_handler = f"handle_{event_name.lower()}"
+
+                    # find the call frame that includes the handler function we are looking for
+                    if call_frame is None:
                         # get the globals from the top-level calling frame
                         frame = inspect.currentframe()
-                        while (frame.f_back != None):
+                        while (event_handler not in frame.f_globals) and (frame.f_back is not None):
                             frame = frame.f_back
-                        globals = frame.f_globals
-                    if (eventHandler in globals):
-                        # the handler is expected to call cgi.ok or cgi.error on the instance
-                        globals[eventHandler](self)
-                    else:
-                        self.error("No handler found for '{}' ({})".format (EVENT, eventName))
-                else:
-                    self.error ("Missing '{}'".format (EVENT))
-        except Exception as exception:
-            self.errorOnException(exception)
+                        call_frame = frame.f_globals
 
-    def errorOnException (self, exception):
-        trace = [ "({}) {}".format (type(exception).__name__, str(exception)) ]
+                    # if we found the handler, let's do it
+                    if event_handler in call_frame:
+                        # the handler is expected to call cgi.ok or cgi.error on the instance
+                        call_frame[event_handler](self)
+                    else:
+                        self.error(f"No handler found for '{EVENT}' ({event_name})")
+                else:
+                    self.error(f"Missing '{EVENT}'")
+        except Exception as exception:
+            self.error_on_exception(exception)
+
+    def error_on_exception(self, exception: BaseException):
+        trace = [f"({type(exception).__name__}) {exception}"]
         tb = exception.__traceback__
         while tb is not None:
-            trace.append("({}) {}, line {}".format (tb.tb_frame.f_code.co_name, tb.tb_frame.f_code.co_filename, tb.tb_lineno))
+            trace.append(f"({tb.tb_frame.f_code.co_name}) {tb.tb_frame.f_code.co_filename}, line {tb.tb_lineno}")
             tb = tb.tb_next
         self.error(trace)
-

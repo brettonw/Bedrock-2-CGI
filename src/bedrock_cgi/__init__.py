@@ -1,1 +1,1 @@
-from bedrock_cgi.service_base import ServiceBase
+from .service_base import ServiceBase

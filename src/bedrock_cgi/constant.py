@@ -1,7 +1,3 @@
-# because I disagree with the python language design
-false = False
-true = True
-
 # constants we use globally
 MIME_TYPE_JSON = "application/json"
 CHARSET = "charset"
@@ -25,4 +21,13 @@ STATUS_UNSUPPORTED_REQUEST_METHOD = "501 Unsupported Request"
 REQUEST_METHOD = "REQUEST_METHOD"
 REQUEST_METHOD_POST = "POST"
 REQUEST_METHOD_OPTIONS = "OPTIONS"
+
+# some constants we need
+EVENT = "event"
+EVENT_QUERY = "query"
+EVENT_RESPONSE = "response"
+EVENT_RESPONSE_TIME_NS = "response-time-ns"
+EVENT_STATUS = "status"
+EVENT_STATUS_OK = "ok"
+EVENT_STATUS_ERROR = "error"
 

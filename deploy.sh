@@ -8,7 +8,7 @@ cp template_setup.cfg $SETUP_CFG_FILE;
 BUILD_NUMBER_FILE="build_number.txt";
 BUILD_NUMBER=$(< $BUILD_NUMBER_FILE);
 
-# edit the setup.cfg file to include the buld number
+# edit the setup.cfg file to include the build number
 perl -pi -e "s/%BUILD_NUMBER%/$BUILD_NUMBER/" "$SETUP_CFG_FILE";
 
 # increment the version for the next run
@@ -18,5 +18,6 @@ git commit -m "build number increment" $BUILD_NUMBER_FILE;
 
 # build, upload, and clean up (because the python build tools don't)
 python3 -m build
-python3 -m twine upload dist/*
+#python3 -m twine upload dist/*
 rm -rf build dist setup.cfg
+find . -iname *.egg-info -exec echo rm -rf {} \;
