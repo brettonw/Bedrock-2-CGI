@@ -18,6 +18,6 @@ git commit -m "build number increment" $BUILD_NUMBER_FILE;
 
 # build, upload, and clean up (because the python build tools don't)
 python3 -m build
-#python3 -m twine upload dist/*
+python3 -m twine upload dist/*
 rm -rf build dist setup.cfg
-find . -iname *.egg-info -exec echo rm -rf {} \;
+find . -iname *.egg-info -exec rm -rf {} \;
